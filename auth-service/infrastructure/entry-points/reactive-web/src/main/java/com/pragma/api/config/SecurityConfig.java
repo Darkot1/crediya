@@ -19,8 +19,19 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/auth/register", "/api/v1/usuarios","/api/auth/login").permitAll()
+                        // Permitir cualquier ruta de auth (login/register) sin autenticación
+                        .pathMatchers("/api/auth/**").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
+                        // Permitir swagger / openapi sin autenticación
+                        .pathMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .anyExchange().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

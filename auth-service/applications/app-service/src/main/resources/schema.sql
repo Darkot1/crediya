@@ -9,5 +9,6 @@ CREATE TABLE users (
                        email VARCHAR(255) UNIQUE,
                        document_number BIGINT,
                        phone_number VARCHAR(20),
-                       base_salary DOUBLE PRECISION
+                       base_salary DOUBLE PRECISION,
+                       password VARCHAR(255)
 );

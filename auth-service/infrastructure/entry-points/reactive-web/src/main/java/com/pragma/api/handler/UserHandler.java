@@ -1,13 +1,13 @@
-package com.pragma.api;
+package com.pragma.api.handler;
 
 import com.pragma.api.dto.UserRequestDTO;
-import com.pragma.api.exception.ValidacionException;
+import com.pragma.api.exception.ValidationException;
 import com.pragma.api.mapper.UserMapper;
 import com.pragma.usecase.user.UserUseCase;
+import com.pragma.usecase.security.PasswordEncoder;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -21,17 +21,24 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
-public class Handler {
+public class UserHandler {
 
     private final UserUseCase userUseCase;
     private final UserMapper userMapper;
     private final Validator validator;
+    private final PasswordEncoder passwordEncoder;
 
     public Mono<ServerResponse> registerUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRequestDTO.class)
                 .flatMap(this::validateRequest)
                 .map(userMapper::toUser)
+                // codificar password antes de persistir
+                .map(user -> {
+                    if (user.getPassword() != null && !user.getPassword().isBlank()) {
+                        user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    }
+                    return user;
+                })
                 .flatMap(userUseCase::registerUser)
                 .map(userMapper::toUserResponseDTO)
                 .flatMap(savedUserDTO -> ServerResponse.status(HttpStatus.CREATED)
@@ -41,17 +48,14 @@ public class Handler {
 
     private Mono<UserRequestDTO> validateRequest(UserRequestDTO dto) {
         Set<ConstraintViolation<UserRequestDTO>> violations = validator.validate(dto);
-
         if (violations.isEmpty()) {
             return Mono.just(dto);
         }
-
         Map<String, String> errores = violations.stream()
                 .collect(Collectors.toMap(
-                        violation -> violation.getPropertyPath().toString(),
+                        v -> v.getPropertyPath().toString(),
                         ConstraintViolation::getMessage
                 ));
-
-        return Mono.error(new ValidacionException("Errores de validación: " + errores));
+        return Mono.error(new ValidationException("Errores de validación: " + errores));
     }
 }

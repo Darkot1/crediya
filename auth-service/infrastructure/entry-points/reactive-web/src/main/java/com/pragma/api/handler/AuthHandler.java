@@ -1,4 +1,4 @@
-package com.pragma.api;
+package com.pragma.api.handler;
 
 import com.pragma.api.dto.LoginRequestDTO;
 import com.pragma.api.dto.LoginResponseDTO;
@@ -27,7 +27,7 @@ public class AuthHandler {
                 .flatMap(authUseCase::authenticate)
                 .map(user -> {
                     String token = tokenService.generateToken(user.getEmail(), user.getId(), user.getName());
-                    return new LoginResponseDTO(token, user.getId(), user.getName(), user.getEmail());
+                    return new LoginResponseDTO(token);
                 })
                 .flatMap(response -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)

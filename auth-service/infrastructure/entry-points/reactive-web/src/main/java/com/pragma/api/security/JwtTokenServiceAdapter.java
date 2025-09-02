@@ -20,7 +20,7 @@ public class JwtTokenServiceAdapter implements TokenService {
     @Value("${jwt.secret:defaultSecretKey12345678901234567890}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}") // 24 horas en milisegundos
+    @Value("${jwt.expiration:86400000}")
     private Long expiration;
 
     private Key getSigningKey() {

@@ -25,7 +25,11 @@ public record UserRequestDTO(
 
         @NotNull(message = "El salario base es obligatorio")
         @Positive(message = "El salario base debe ser mayor que cero")
-        Double baseSalary
+        Double baseSalary,
+
+        @NotNull(message = "La contraseña es obligatoria")
+        @NotBlank(message = "La contraseña no puede estar vacía")
+        String password
 
 ) {
 }

@@ -33,4 +33,7 @@ public class UserData {
 
     @Column("base_salary")
     private Double baseSalary;
+
+    @Column("password")
+    private String password;
 }
